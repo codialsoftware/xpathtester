@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace XPathTester
@@ -20,14 +22,31 @@ namespace XPathTester
             RegisterDebug();
         }
 
+        protected override void OnLoad(EventArgs e)
+        {
+            HandleCommandLineArguments();
+        }
+
+        private void HandleCommandLineArguments()
+        {
+            var args = Environment.GetCommandLineArgs().Skip(1);
+            if (args.Any() && File.Exists(args.First()))
+                OpenFile(args.First());
+        }
+
+        public void OpenFile(string pathToFile)
+        {
+            createTool(pathToFile);
+            showXml();
+        }
+
         private void openFile_Click(object sender, EventArgs e)
         {
             var result = openXML.ShowDialog();
 
             if (result == DialogResult.OK)
             {
-                createTool();
-                showXml();
+                OpenFile(openXML.FileName);
             }
         }
 
@@ -43,16 +62,16 @@ namespace XPathTester
             }
         }
 
-        private void createTool()
+        private void createTool(string pathToFile)
         {
-            xpathTool = ToolsFactory.Create(openXML.FileName, xmlView.Text);
+            xpathTool = ToolsFactory.Create(pathToFile, xmlView.Text);
         }
 
         private void xmlView_TextChanged(object sender, EventArgs e)
         {
             if (xpathTool == null)
             {
-                createTool();
+                createTool(openXML.FileName);
             }
 
             if (xpathTool != null)
@@ -66,7 +85,7 @@ namespace XPathTester
         {
             if (xpathTool == null)
             {
-                createTool();
+                createTool(openXML.FileName);
             }
 
             if (xpathTool != null)
@@ -98,7 +117,7 @@ namespace XPathTester
         {
             if (xpathTool == null)
             {
-                createTool();
+                createTool(openXML.FileName);
             }
 
             RefreshResultsView();
